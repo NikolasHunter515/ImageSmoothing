@@ -4,6 +4,10 @@
 #include "imgProcess.h"
 using namespace std;
 
+//TODO consider writing method to filter color images.
+//method may use struct or object, in a threaded enviornment.
+
+//jpg to pgm to txt.
 void parseFile(const string& filename, vector<vector<int>>& image, string& header) {
     ifstream file(filename);
     string line;
@@ -60,6 +64,7 @@ void parseFile(const string& filename, vector<vector<int>>& image, string& heade
     file.close();
 }
 
+//extension of a file does not need to be pass.
 void writeFile(const string fileName, const vector<vector<int>> data, const string header) {
     ofstream file(fileName);
     //file << header << endl;
@@ -71,15 +76,7 @@ void writeFile(const string fileName, const vector<vector<int>> data, const stri
 
     for(int i = 0; i < data.size(); i++) {
         for(int j = 0; j < data[i].size(); j++) {
-            /*string index = to_string(j) + "," + to_string(i);
-            string value = to_string(data[i][j]) + "," + to_string(data[i][j]) + "," + to_string(data[i][j]);
-            string hexa = toHex(data[i][j]);
-
-            input = index + ": (" + value + ")  #" + hexa + "  gray(" + value + ")";
-            file << input << endl;*/
-
-            //sample writing to PGM test.
-
+        	//writes to PGM file
             file << data[i][j] << " ";
 
         }
@@ -89,93 +86,22 @@ void writeFile(const string fileName, const vector<vector<int>> data, const stri
 }
 
 void medianFilter(vector<vector<int>>& input, int windowSize, double& step){
-	// write code to get a pixel window of size n with the current pixel as the center.
-	// this pixel window should consider the row and column numbers.
 	int startDex = floor(windowSize / 2); // needs better name
 	int median;
 
-	//NEW idea
+	//uses sliding window, and random pivot to filter.
 	for (int i = 0; i < input.size(); i++) {
 		for(int j = 0; j < input[i].size(); j++) {
 			vector<int> v2;
-			/*if (j + windowSize <= input[i].size() || i + windowSize <= input[i].size()) {
-				toVect(input, i, j, windowSize, v2);
-			}
-			else if(j + windowSize >= input[i].size()) {
-				toVect(input, i, j, (windowSize + j) - input[i].size(), v2);
-			}
-			else if (i + windowSize > input.size()) {
-				toVect(input, i, j, (windowSize + i) - input.size(), v2);
-			}*/
 			for (int k = i; k < i + windowSize && k < input.size(); k++) {
 				for (int l = j; l < j + windowSize && l < input[i].size(); l++) {
 					v2.push_back(input[k][l]);
 				}
 			}
-			//median = medOfMed(v2, v2.size(), windowSize, step);
 			median = randomMedian(v2);
 			input[i][j] = median;
 		}
 	}
-	/*for(int i = 0; i < input.size(); i++){
-		for(int j = 0; j < input[i].size(); j++){
-			if(i - startDex >= 0 && i + startDex <= input.size() && i + startDex > input.size() && j + startDex <= input[i].size() && j - startDex >= 0){
-				// copy values from window to 1d vector
-				toVect(input, i - startDex, j - startDex, windowSize, v2);
-				// perform median of medians on the 1d vector
-				median = medOfMed(v2, v2.size(), windowSize, step);
-				//median = findMedian(v2, windowSize);
-				// push the new median of medians to output vector.
-				input[i][j] = median;
-				//cout << i << "," << j << " = " << median << endl;
-			}
-			else if(i - startDex < 0 || j - startDex < 0){
-			    toVect(input, 0, j, windowSize, v2);
-
-			    median = medOfMed(v2, v2.size(), windowSize, step);
-				//median = findMedian(v2, windowSize);
-				// push the new median of medians to output vector.
-				input[i][j] = median;
-			}
-			//bottom
-			else if(i + startDex > input.size()){
-			    if(j + startDex > input[i].size()){
-			        toVect(input, i - startDex, j - startDex , windowSize, v2);
-			    }
-			    else if(j - startDex < 0){
-			        toVect(input, i - startDex, 0, windowSize, v2);
-			    }
-			    else toVect(input, i - startDex, j , windowSize, v2);
-
-				// perform median of medians on the 1d vector
-				median = medOfMed(v2, v2.size(), windowSize, step);
-				//median = findMedian(v2, windowSize);
-				// push the new median of medians to output vector.
-				input[i][j] = median;
-			}
-            //right side
-            else if(j + startDex > input[i].size()){
-                toVect(input, i, j, windowSize, v2);
-				// perform median of medians on the 1d vector
-				median = medOfMed(v2, v2.size(), windowSize, step);
-            	//median = findMedian(v2, windowSize);
-				// push the new median of medians to output vector.
-				input[i][j] = median;
-            }
-            else if(j - startDex < input[i].size()){
-                toVect(input, i, j, windowSize, v2);
-				// perform median of medians on the 1d vector
-				median = medOfMed(v2, v2.size(), windowSize, step);
-            	//median = findMedian(v2, windowSize);
-				// push the new median of medians to output vector.
-				input[i][j] = median;
-            }
-
-			else{
-			    v2.clear();
-			}
-		}
-	}*/
 }
 
 void massFiltering(vector<string> names, string inFilePath, string outFilePath, string fileExtension, int windowSize){
@@ -191,3 +117,5 @@ void massFiltering(vector<string> names, string inFilePath, string outFilePath, 
         writeFile(outFilePath + "/" + names[i] + ".pgm",image, header);
     }
 }
+
+//TODO consider writing method to filter image multiple times, or overload existing method.

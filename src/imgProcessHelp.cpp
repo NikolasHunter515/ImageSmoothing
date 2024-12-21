@@ -9,6 +9,7 @@ void swap(int &a, int &b){ // three steps every time.
     a = temp;
 }
 
+//retruns int values converted to hex(capital chars), and returns values of length 6(3 bytes).
 string toHex(int num) {
     //TODO consider adding parameter to allow user to decide how long hex string should be.
     stringstream ss;
